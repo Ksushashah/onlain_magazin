@@ -1,7 +1,7 @@
 
 from sqlalchemy import  ForeignKey, select, text
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Mapped,mapped_column, relationship
 
 from models.enums import StatusEnum
 
@@ -36,10 +36,10 @@ class Order(Base):
     
     @classmethod
     @connection
-    def update_status(cls, order_id: int, new_status: StatusEnum, session: Session = None):
-        order = session.execute(select(cls).where(cls.id == order_id)).scalars().first()
+    async def update_status(cls, order_id: int, new_status: StatusEnum, session: AsyncSession = None):
+        order = await session.execute(select(cls).where(cls.id == order_id)).scalars().first()
         if not order:
             return f"Заказ с id {order_id} не найден"
         order.status = new_status
-        session.commit() 
+        await session.commit() 
         return f"Статус заказа {order_id}  обновлен на {new_status}"

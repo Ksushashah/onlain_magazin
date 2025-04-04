@@ -1,7 +1,8 @@
 
 import bcrypt
 from sqlalchemy import select
-from sqlalchemy.orm import Mapped, Session,relationship
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Mapped,relationship
 from models.cart import Cart
 
 
@@ -31,14 +32,14 @@ class User(Base):
     
     @classmethod
     @connection
-    def add(cls, 
+    async def add(cls, 
             username: str, 
             email: str, 
             password: str,
             
-            session: Session = None) -> dict[str, int]:
+            session: AsyncSession = None) -> dict[str, int]:
         
-        existed_row = session.execute(select(cls).where(cls.username == username))
+        existed_row =  await session.execute(select(cls).where(cls.username == username))
         user = existed_row.scalars().first() 
         if user:
             print(f'Пользователь {user.username} уже существует')
@@ -49,7 +50,7 @@ class User(Base):
         new_user = User(username=username, email=email, password=str(hash_pw)[2:-1])
     
         session.add(new_user)
-        session.flush() 
+        await session.flush() 
     
         cart = Cart(
             user_id = new_user.id,
@@ -57,7 +58,7 @@ class User(Base):
         )
     
         session.add(cart)
-        session.commit()
+        await session.commit()
         print(f'Создан пользователь с ID {new_user.id} и ему присвоена корзина -  {cart.id}')
 
         return {'user_id': new_user.id, 'cart_id': cart.id}

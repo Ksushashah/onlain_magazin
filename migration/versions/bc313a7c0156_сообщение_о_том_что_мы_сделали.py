@@ -1,8 +1,8 @@
 """*Сообщение о том что мы сделали*
 
-Revision ID: 38d30be6fa9c
-Revises: 1a4580b80c8a
-Create Date: 2025-03-27 14:53:28.714053
+Revision ID: bc313a7c0156
+Revises: 
+Create Date: 2025-04-03 14:15:17.739441
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '38d30be6fa9c'
-down_revision: Union[str, None] = '1a4580b80c8a'
+revision: str = 'bc313a7c0156'
+down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -24,7 +24,7 @@ def upgrade() -> None:
     op.create_table('categorys',
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('create_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('create_at', sa.DateTime(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('users',
@@ -32,7 +32,7 @@ def upgrade() -> None:
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('password', sa.String(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('create_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('create_at', sa.DateTime(), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')
@@ -40,7 +40,7 @@ def upgrade() -> None:
     op.create_table('carts',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('create_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('create_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id')
@@ -50,8 +50,9 @@ def upgrade() -> None:
     sa.Column('description', sa.String(), nullable=False),
     sa.Column('price', sa.Integer(), nullable=False),
     sa.Column('category_id', sa.Integer(), nullable=False),
+    sa.Column('average_rating', sa.Float(), server_default=sa.text("'0.0'"), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('create_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('create_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['category_id'], ['categorys.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -60,7 +61,7 @@ def upgrade() -> None:
     sa.Column('product_id', sa.Integer(), nullable=False),
     sa.Column('quantity', sa.Integer(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('create_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('create_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['cart_id'], ['carts.id'], ),
     sa.ForeignKeyConstraint(['product_id'], ['products.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -71,7 +72,7 @@ def upgrade() -> None:
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('cart_id', sa.Integer(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('create_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('create_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['cart_id'], ['carts.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -81,7 +82,7 @@ def upgrade() -> None:
     sa.Column('product_id', sa.Integer(), nullable=False),
     sa.Column('rating', sa.Enum('ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE', 'TEN', name='ratingenum',create_type=False), server_default=sa.text("'ONE'"), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('create_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('create_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['product_id'], ['products.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -91,7 +92,7 @@ def upgrade() -> None:
     sa.Column('quantity', sa.Integer(), nullable=False),
     sa.Column('price_at_time', sa.Integer(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('create_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('create_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['order_id'], ['orders.id'], ),
     sa.ForeignKeyConstraint(['product_id'], ['products.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -111,5 +112,5 @@ def downgrade() -> None:
     op.drop_table('users')
     op.drop_table('categorys')
     # ### end Alembic commands ###
-    op.execute('DROP TYPE IS EXISTS statusenum;')
-    op.execute('DROP TYPE IS EXISTS ratingenum;')
+    op.drop_table('DROP TYPE IS EXISTS ratingenum;')
+    op.drop_table('DROP TYPE IS EXISTS statusenum;')

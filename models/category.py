@@ -1,6 +1,7 @@
 
 from sqlalchemy import select
-from sqlalchemy.orm import Mapped, Session, relationship
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Mapped, relationship
 
 from settings.database import Base, connection
 
@@ -17,8 +18,8 @@ class Category(Base):
     
     @classmethod
     @connection
-    def create_category(cls, name: str, session: Session = None):
-        existed_row = session.execute(select(cls).where(cls.name == name))
+    async def create_category(cls, name: str, session: AsyncSession = None):
+        existed_row = await session.execute(select(cls).where(cls.name == name))
         category = existed_row.scalars().first() 
         if category:
             print(f"Категория {name} уже существует")
@@ -26,7 +27,7 @@ class Category(Base):
         new_category= Category(name=name)
         session.add(new_category)
         print(f'Категория {name} создана')
-        session.commit()
+        await session.commit()
         return  new_category
     
     
